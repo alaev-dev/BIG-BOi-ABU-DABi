@@ -27,6 +27,6 @@ class SendService(
                     .build()
             }
             .exchangeToMono { it.bodyToMono(String::class.java) }
-            .subscribe {log.info(it)}
+            .subscribe { log.info(it) }
     }
 }
