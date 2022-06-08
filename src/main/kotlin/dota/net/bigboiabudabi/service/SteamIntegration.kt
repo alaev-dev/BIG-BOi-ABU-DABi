@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 import java.time.Duration
 import java.time.LocalDateTime
@@ -16,7 +17,7 @@ import java.time.LocalDateTime
  *
  * @author Alaev Konstantin
  */
-@Component
+@Service
 class SteamIntegration(
     // private val sender: ISender,
     @Value("\${app.developerKey}")
