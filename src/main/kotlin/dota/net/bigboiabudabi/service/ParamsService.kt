@@ -31,4 +31,9 @@ class ParamsService(
             log.info("New developerKey" + steamIntegration.developerKey)
         }
     }
+
+    fun setTimeoutSendMessage(timeout: Long) {
+        steamIntegration.timeoutToFuck = timeout
+        log.info("New timeout = $timeout")
+    }
 }
