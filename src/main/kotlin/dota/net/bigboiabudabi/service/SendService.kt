@@ -10,16 +10,23 @@ import kotlin.random.Random
 @Service
 class SendService(
     @Value("\${app.accessTokenVK}")
-    private val accessTokenVk: String
+    var accessTokenVk: String,
+    @Value("\${app.chatIdVk}")
+    var chatIdVk: String
 ) : ISender {
 
     private val log = LoggerFactory.getLogger(SendService::class.java)
 
+    /**
+     * Метод рассылки сообщений
+     * @param message сообщение для рассылки кирюхе
+     * @author некий Икоркин Алексей
+     */
     override fun sendMessage(message: String) {
         WebClient.create("https://api.vk.com/method/messages.send")
             .get()
             .uri {
-                it.queryParam("chat_id", "1")
+                it.queryParam("chat_id", chatIdVk)
                     .queryParam("random_id", Random(LocalDateTime.now().nano).nextInt().toString())
                     .queryParam("message", message)
                     .queryParam("access_token", accessTokenVk)

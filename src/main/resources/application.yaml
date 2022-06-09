@@ -2,3 +2,4 @@ app:
   developerKey: ${DEVELOPER_KEY}
   gamerId: ${GAMER_ID:76561198118283878}
   accessTokenVK: ${ACCESS_TOKEN_VK}
+  chatIdVk: ${CHAT_ID_VK}
