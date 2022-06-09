@@ -3,6 +3,7 @@ package dota.net.bigboiabudabi.service
 import dota.net.bigboiabudabi.dto.Game
 import dota.net.bigboiabudabi.dto.Player
 import dota.net.bigboiabudabi.dto.SteamProfiles
+import dota.net.bigboiabudabi.enum.RealName
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.Scheduled
@@ -27,6 +28,14 @@ class SteamIntegration(
     private var gamesTenSecondsAgo: List<Game>? = null
     private val log = LoggerFactory.getLogger(this::class.java)
     private var startGame: LocalDateTime? = null
+    private val mapName: Map<RealName, String> = mapOf(
+        RealName.Kiruha to "КИРЮХА",
+        RealName.Cumstantin to "КОСТЯ",
+        RealName.Gelya to "ГЕЛЯ",
+        RealName.Miktor to "МИКТОР",
+        RealName.Petya to "ПЕТЯ",
+        RealName.Leha to "ЛЕХА"
+        )
     var timeoutToFuck: Long = 5
 
     /**
@@ -71,29 +80,5 @@ class SteamIntegration(
 
         if (Duration.between(startGame, LocalDateTime.now()).toMinutes() >= timeoutToFuck)
             sender.sendMessage(message)
-    }
-
-    /** collect hours
-     * uri: "https://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v0001/?key=$developerKey&steamid=$gamerId&format=json"
-     */
-    private fun analyze(games: List<Game>) {
-        // first init check
-        if (gamesTenSecondsAgo == null) {
-            gamesTenSecondsAgo = games
-            return
-        }
-
-        // collect past minutes and present
-        val pastMinutes = gamesTenSecondsAgo!!.sumOf { it.playtime_forever }
-        val presentMinutes = games.sumOf { it.playtime_forever }
-
-        if (presentMinutes > pastMinutes) {
-            val diff =
-                games.map { it.playtime_forever }.minus(gamesTenSecondsAgo!!.map { it.playtime_forever }.toSet())[0]
-
-            val runningGame = games.filter { it.playtime_forever == diff }[0]
-
-            log.warn("GAMER IN GAME!!! ${runningGame.name} played ${runningGame.playtime_2weeks} minutes on 2 weeks")
-        } else log.info("check: ${games.map { "${it.name} minutes: ${it.playtime_2weeks} " }} ")
     }
 }
