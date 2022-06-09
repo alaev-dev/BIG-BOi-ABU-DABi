@@ -20,13 +20,14 @@ import java.time.LocalDateTime
 class SteamIntegration(
     private val sender: ISender,
     @Value("\${app.developerKey}")
-    private val developerKey: String,
+    var developerKey: String,
     @Value("\${app.gamerId}")
-    private val gamerId: String
+    var gamerId: String,
 ) {
     private var gamesTenSecondsAgo: List<Game>? = null
     private val log = LoggerFactory.getLogger(this::class.java)
     private var startGame: LocalDateTime? = null
+    var timeoutToFuck: Long = 5
 
     /**
      * Checking the player for what he is playing
@@ -68,7 +69,7 @@ class SteamIntegration(
 
         log.warn(message)
 
-        if (Duration.between(startGame, LocalDateTime.now()).toMinutes() >= 5)
+        if (Duration.between(startGame, LocalDateTime.now()).toMinutes() >= timeoutToFuck)
             sender.sendMessage(message)
     }
 
