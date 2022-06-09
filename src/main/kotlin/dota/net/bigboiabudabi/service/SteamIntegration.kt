@@ -6,7 +6,6 @@ import dota.net.bigboiabudabi.dto.SteamProfiles
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.Scheduled
-import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 import java.time.Duration
@@ -19,11 +18,11 @@ import java.time.LocalDateTime
  */
 @Service
 class SteamIntegration(
-    // private val sender: ISender,
+    private val sender: ISender,
     @Value("\${app.developerKey}")
-    var developerKey: String,
+    private val developerKey: String,
     @Value("\${app.gamerId}")
-    var gamerId: String
+    private val gamerId: String
 ) {
     private var gamesTenSecondsAgo: List<Game>? = null
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -32,7 +31,7 @@ class SteamIntegration(
     /**
      * Checking the player for what he is playing
      */
-    @Scheduled(fixedRate = 10000)
+    @Scheduled(fixedRate = 60100)
     fun checkOnGaming() {
         WebClient.create().get().uri(
             "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/" +
@@ -45,20 +44,32 @@ class SteamIntegration(
     private fun checkInGame(games: List<Player>) {
         games.forEach { player ->
             if (player.gameextrainfo != null) {
-                if (startGame == null) startGame = LocalDateTime.now()
-                log.warn(
-                    "${player.personaname} IN GAME ${player.gameextrainfo} time:" +
-                        " ${Duration.between(startGame, LocalDateTime.now()).toMinutes()} minutes"
-                )
+                sendIngameTimeToSenderAndLog(player)
             } else {
-                if (startGame != null) {
-                    log.warn(
-                        "In game: ${Duration.between(startGame, LocalDateTime.now()).toMinutes()} minutes"
-                    )
-                    startGame = null
-                } else log.info("All right!")
+                sendResultIngameTimeAndLog()
             }
         }
+    }
+
+    private fun sendResultIngameTimeAndLog() {
+        if (startGame != null) {
+            val message = "ЖЕСТКО ПРОЕБАЛ ${Duration.between(startGame, LocalDateTime.now()).toMinutes()} МИНУТ"
+
+            log.warn(message)
+            sender.sendMessage(message)
+            startGame = null
+        } else log.info("All right!")
+    }
+
+    private fun sendIngameTimeToSenderAndLog(player: Player) {
+        if (startGame == null) startGame = LocalDateTime.now()
+        val message = "${player.personaname} ЖЕСТКО ЗАДРОТИТ В ${player.gameextrainfo} УЖЕ БЛЯТЬ" +
+            " ${Duration.between(startGame, LocalDateTime.now()).toMinutes()} МИНУТ. ОСТАНОВИСЬ!!!"
+
+        log.warn(message)
+
+        if (Duration.between(startGame, LocalDateTime.now()).toMinutes() >= 5)
+            sender.sendMessage(message)
     }
 
     /** collect hours
